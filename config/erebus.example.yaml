@@ -1,0 +1,22 @@
+# Erebus reference policy + service config.
+# Allowlist rules are evaluated top-to-bottom; deny_binaries always wins.
+agent: claude_code
+ticket_provider: local
+executor: local
+approval_ttl_hours: 24
+on_deny: resume            # resume | abort
+
+policy:
+  deny_binaries:
+    - rm
+    - dd
+    - mkfs
+  allow:
+    - binary: git
+      args:
+        first_in: [status, log, diff, show, branch, fetch]
+    - binary: ls
+    - binary: cat
+      args:
+        all_match:
+          - "^/var/log/.*"
