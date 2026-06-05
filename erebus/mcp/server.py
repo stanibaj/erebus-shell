@@ -12,6 +12,7 @@ import os
 from mcp.server.fastmcp import FastMCP
 
 from erebus.executor.local import LocalExecutor
+from erebus.executor.ssh import SSHExecutor
 from erebus.mcp.gate import CommandGate
 from erebus.policy.engine import PolicyEngine
 from erebus.policy.models import load_policy_from_yaml
@@ -35,6 +36,23 @@ def build_mcp(gate: CommandGate) -> FastMCP:
     return mcp
 
 
+def build_executor_from_env():
+    kind = os.environ.get("EREBUS_EXECUTOR", "local")
+    if kind == "local":
+        return LocalExecutor()
+    if kind == "ssh":
+        host = os.environ["EREBUS_SSH_HOST"]
+        user = os.environ["EREBUS_SSH_USER"]
+        key = os.environ.get("EREBUS_SSH_KEY")
+        port = int(os.environ.get("EREBUS_SSH_PORT", "22"))
+        known_hosts = os.environ.get("EREBUS_SSH_KNOWN_HOSTS")
+        return SSHExecutor(
+            host=host, username=user, port=port,
+            client_keys=[key] if key else None, known_hosts=known_hosts,
+        )
+    raise ValueError(f"unknown EREBUS_EXECUTOR: {kind}")
+
+
 def build_gate_from_env() -> CommandGate:
     run_id = os.environ["EREBUS_RUN_ID"]
     db_path = os.environ["EREBUS_DB_PATH"]
@@ -48,7 +66,7 @@ def build_gate_from_env() -> CommandGate:
     tickets.init_schema()
     engine = PolicyEngine(load_policy_from_yaml(policy_path))
     return CommandGate(
-        run_id=run_id, engine=engine, executor=LocalExecutor(),
+        run_id=run_id, engine=engine, executor=build_executor_from_env(),
         tickets=tickets, store=store, ttl_hours=ttl_hours,
     )
 
