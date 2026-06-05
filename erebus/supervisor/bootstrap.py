@@ -1,6 +1,8 @@
 """Build a wired FastAPI app from a YAML config file (used by `erebus serve`)."""
 from __future__ import annotations
 
+import os  # pragma: no cover
+
 import yaml  # pragma: no cover
 
 from erebus.agents.claude_code import ClaudeCodeAdapter  # pragma: no cover
@@ -16,6 +18,10 @@ def build_app_from_config(config_path: str):  # pragma: no cover
         cfg = yaml.safe_load(fh)
     db_path = cfg.get("db_path", "data/erebus.db")
     tickets_db = cfg.get("tickets_db", "data/tickets.db")
+    for path in (db_path, tickets_db):
+        parent = os.path.dirname(path)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
     store = Store(db_path); store.init_schema()
     tickets = LocalTicketProvider(tickets_db); tickets.init_schema()
     policy = load_policy_from_yaml(config_path)

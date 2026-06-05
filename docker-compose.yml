@@ -21,6 +21,4 @@ services:
       - .:/app
     ports:
       - "8080:8080"
-    # Phase 5 replaces this with:
-    #   command: uvicorn erebus.supervisor.service:app --host 0.0.0.0 --port 8080
-    command: ["python", "-c", "print('erebus app entrypoint — HTTP service arrives in Phase 5')"]
+    command: ["erebus", "serve", "--host", "0.0.0.0", "--port", "8080", "--config", "config/erebus.example.yaml"]
