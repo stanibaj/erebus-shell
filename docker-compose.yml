@@ -1,0 +1,26 @@
+# Dev/runtime orchestration for erebus-shell.
+#   Run tests:   docker compose run --rm test
+#   Open shell:  docker compose run --rm test bash
+#   Run app:     docker compose up app   (service implemented in Phase 5)
+#
+# The project is bind-mounted into /app so host edits take effect without a
+# rebuild (the package is installed editable inside the image's venv).
+
+services:
+  test:
+    build: .
+    image: erebus-shell:dev
+    volumes:
+      - .:/app
+    command: pytest -v
+
+  app:
+    build: .
+    image: erebus-shell:dev
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    # Phase 5 replaces this with:
+    #   command: uvicorn erebus.supervisor.service:app --host 0.0.0.0 --port 8080
+    command: ["python", "-c", "print('erebus app entrypoint — HTTP service arrives in Phase 5')"]

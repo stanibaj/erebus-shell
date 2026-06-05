@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Erebus runtime state
+*.db
+*.db-wal
+*.db-shm
+data/
+
+# OS / editor
+.DS_Store
